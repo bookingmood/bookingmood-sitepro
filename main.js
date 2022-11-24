@@ -7,9 +7,61 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     resizable: true,
   },
   pluginScoped: {
-    currencyOptions: [],
-    fontOptions: [],
-    localeOptions: [],
+    apiKey: null,
+    widgetOptions: [{ name: "Select a widget", id: "default" }],
+    currencyOptions: [{ name: "Default", id: "default" }],
+    fontOptions: [{ name: "Default", id: "default" }],
+    localeOptions: [{ name: "Default", id: "default" }],
+  },
+  async loadWidgets(field, value) {
+    const organization = await fetch(
+      `https://www.bookingmood.com/api/organizations`,
+      { headers: { Authorization: `Bearer ${this.pluginScoped.apiKey}` } }
+    ).then((res) => res.json());
+    const widgets = await fetch(
+      `https://www.bookingmood.com/api/organizations/${organization.id}/widgets`,
+      { headers: { Authorization: `Bearer ${this.pluginScoped.apiKey}` } }
+    ).then((res) => res.json());
+    this.pluginScoped.widgetOptions = widgets.map((widget) => ({
+      name: widget.title || widget.id,
+      type: widget.type,
+      id: widget.id,
+    }));
+    field.setOptions(this.pluginScoped.widgetOptions);
+    field.selectItem(field.getItemById(value || "default"));
+  },
+  async loadCurrencyOptions(field, value) {
+    const { options } = await fetch(
+      `https://www.bookingmood.com/api/websitebuilder/widget-currencies`
+    ).then((res) => res.json());
+    this.pluginScoped.currencyOptions = [
+      { name: "Default for organization", value: "default" },
+      ...options.map((option) => ({ name: option.label, id: option.value })),
+    ];
+    field.setOptions(this.pluginScoped.currencyOptions);
+    field.selectItem(field.getItemById(value || "default"));
+  },
+  async loadFontOptions() {
+    const { options } = await fetch(
+      `https://www.bookingmood.com/api/websitebuilder/widget-fonts`
+    ).then((res) => res.json());
+    this.pluginScoped.fontOptions = [
+      { name: "Default", value: "default" },
+      ...options.map((option) => ({ name: option.label, id: option.value })),
+    ];
+    field.setOptions(this.pluginScoped.fontOptions);
+    field.selectItem(field.getItemById(value || "default"));
+  },
+  async loadLocaleOptions() {
+    const { options } = await fetch(
+      `https://www.bookingmood.com/api/websitebuilder/widget-locales`
+    ).then((res) => res.json());
+    this.pluginScoped.localeOptions = [
+      { name: "Default", value: "default" },
+      ...options.map((option) => ({ name: option.label, id: option.value })),
+    ];
+    field.setOptions(this.pluginScoped.localeOptions);
+    field.selectItem(field.getItemById(value || "default"));
   },
   propertyDialog: {
     noScroll: true,
@@ -23,13 +75,27 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
             children: [
               {
                 type: "Label",
-                text: "Bookingmood widget ID",
-                helpText: "To find widget ID, go to TODO",
+                text: "Bookingmood API key",
+                helpText:
+                  "Use an existing API key, or create a new one in the bookingmood admin panel (settings -> api access)",
               },
               {
                 type: "TextField",
+                id: "api_key",
+                change: async (fields) => {
+                  console.log(fields.api_key.getValue());
+                },
+              },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Bookingmood widget" },
+              {
+                type: "DropdownBox",
                 id: "widget_id",
-                placeholder: "000000000000-0000-0000-00000000",
+                options: this.pluginScoped.widgetOptions,
               },
             ],
           },
@@ -46,11 +112,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "locale",
-                options: [
-                  { name: "Default", id: "default" },
-                  { name: "English", id: "en-US" },
-                  { name: "Nederlands", id: "nl-NL" },
-                ],
+                options: this.pluginScoped.localeOptions,
               },
             ],
           },
@@ -96,11 +158,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "currency",
-                options: [
-                  { name: "Default", id: "default" },
-                  { name: "Euro", id: "EUR" },
-                  { name: "US Dollar", id: "USD" },
-                ],
+                options: this.pluginScoped.currencyOptions,
               },
             ],
           },
@@ -236,11 +294,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "font",
-                options: [
-                  { name: "Default", id: "default" },
-                  { name: "Arial", id: "Arial" },
-                  { name: "Helvetica", id: "Helvetica" },
-                ],
+                options: this.pluginScoped.fontOptions,
               },
             ],
           },
@@ -249,12 +303,17 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     ],
   },
   openAction: function (fields, data, elem) {
-    console.log(fields, data, elem, this);
     // General
-    fields.widget_id.setText(data.content.widget_id);
+    this.pluginScoped.apiKey = data.content.api_key || null;
+    fields.api_key.setText(data.content.api_key);
+    fields.widget_id.selectItem(
+      fields.locale.getItemById(data.content.widget_id || "default")
+    );
 
     // Localization
-    fields.locale.selectItem(fields.locale.getItemById(data.content.locale));
+    fields.locale.selectItem(
+      fields.locale.getItemById(data.content.locale || "default")
+    );
     fields.week_starts_on.selectItem(
       fields.week_starts_on.getItemById(
         isNaN(data.content.week_starts_on)
@@ -300,10 +359,23 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     );
 
     // Load upstream options
+    if (this.pluginScoped.apiKey)
+      this.loadWidgets(fields.widget_id, data.content.widget_id);
+    if (this.pluginScoped.currencyOptions.length === 0)
+      this.loadCurrencyOptions(fields.currency, data.content.currency);
+    if (this.pluginScoped.fontOptions.length === 0)
+      this.loadFontOptions(fields.font, data.content.font);
+    if (this.pluginScoped.localeOptions.length === 0)
+      this.loadLocaleOptions(fields.locale, data.content.locale);
   },
   applyAction: function (fields, data, elem) {
     // General
-    data.content.widget_id = fields.widget_id.getText();
+    if (fields.widget_id.getSelectedItem()) {
+      data.content.widget_id = fields.widget_id
+        .getSelectedItem()
+        .getOriginal().id;
+      if (data.content.widget_id === "default") data.content.widget_id = null;
+    }
 
     // Localization
     if (fields.locale.getSelectedItem()) {
