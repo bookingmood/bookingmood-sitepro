@@ -4,6 +4,7 @@ const defaultFontOptions = [{ name: "Default", id: "default" }];
 const defaultLocaleOptions = [];
 
 let bmWidgetWrapper;
+let bmWidgetFields;
 
 PluginWrapper.registerPlugin("bookingmood", {
   name: "Bookingmood widget",
@@ -40,8 +41,9 @@ PluginWrapper.registerPlugin("bookingmood", {
       fields.widget_id.getItemById(value || "default")
     );
     if (fields.widget_id.getSelectedItem()) {
+      console.log(bmWidgetWrapper, bmWidgetFields);
       // const type = fields.widget_id.getSelectedItem().getOriginal().type;
-      console.log(this, fields);
+      // console.log(this, fields);
     }
   },
   async loadCurrencyOptions(fields, value) {
@@ -90,6 +92,7 @@ PluginWrapper.registerPlugin("bookingmood", {
             children: [
               {
                 type: "VerticalLayout",
+                id: "api_key_field",
                 children: [
                   {
                     type: "Label",
@@ -102,6 +105,7 @@ PluginWrapper.registerPlugin("bookingmood", {
               },
               {
                 type: "Button",
+                id: "api_key_button",
                 click: async (event, fields) => {
                   const apiKey = fields.api_key.getText();
                   if (!apiKey) return;
@@ -117,6 +121,7 @@ PluginWrapper.registerPlugin("bookingmood", {
           },
           {
             type: "VerticalLayout",
+            id: "widget_id_field",
             children: [
               { type: "Label", text: "Bookingmood widget" },
               {
@@ -130,6 +135,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Localization",
+        id: "localization_tab",
         priority: 1,
         children: [
           {
@@ -193,6 +199,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Layout",
+        id: "layout_tab",
         priority: 1,
         children: [
           {
@@ -252,6 +259,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Theme",
+        id: "theme_tab",
         priority: 1,
         children: [
           {
@@ -331,6 +339,7 @@ PluginWrapper.registerPlugin("bookingmood", {
   },
   openAction: function (fields, data, elem) {
     bmWidgetWrapper = this;
+    bmWidgetFields = fields;
     // General
     this.pluginScoped.apiKey = data.content.api_key || null;
     this.pluginScoped.initialWidgetId = data.content.widget_id || null;
@@ -471,6 +480,8 @@ PluginWrapper.registerPlugin("bookingmood", {
       data.content.font = fields.font.getSelectedItem().getOriginal().id;
       if (data.content.font === "default") data.content.font = null;
     }
+
+    this.updateElement();
   },
   loadAction: function (data) {
     const content = data.content;
