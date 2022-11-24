@@ -24,14 +24,30 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
         name: "General",
         children: [
           {
-            type: "Label",
-            text: "Bookingmood widget ID",
-            helpText: "To find widget ID, go to calendar settings",
+            type: "VerticalLayout",
+            children: [
+              {
+                type: "Label",
+                text: "Bookingmood widget ID",
+                helpText: "To find widget ID, go to TODO",
+              },
+              {
+                type: "TextField",
+                id: "widget_id",
+                placeholder: "000000000000-0000-0000-00000000",
+              },
+            ],
           },
+        ],
+      },
+      {
+        name: "Localization",
+        children: [
+          { type: "Label", text: "Calendar name" },
           {
             type: "TextField",
-            id: "widget_id",
-            placeholder: "000000000000-0000-0000-00000000",
+            id: "calendar_name",
+            placeholder: "Calendar name",
           },
           { type: "Label", text: "Calendar name" },
           {
@@ -39,11 +55,6 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
             id: "calendar_name",
             placeholder: "Calendar name",
           },
-        ],
-      },
-      {
-        name: "Localization",
-        children: [
           { type: "Label", text: "Calendar name" },
           {
             type: "TextField",
@@ -128,11 +139,9 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
 
     // Localization
     data.content.locale = fields.locale.getSelectedItem().getOriginal().id;
-    data.content.week_starts_on = fields.week_starts_on_default.getValue()
-      ? null
-      : fields.week_starts_on_sunday.getValue()
-      ? 0
-      : 1;
+    data.content.week_starts_on = fields.week_starts_on
+      .getSelectedItem()
+      .getOriginal().id;
 
     data.content.first_week_contains_date = fields.first_week_contains_date
       .getSelectedItem()
