@@ -26,11 +26,11 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       `https://www.bookingmood.com/api/organizations`,
       { headers: { Authorization: this.pluginScoped.apiKey } }
     ).then((res) => res.json());
-    const widgets = await fetch(
+    const res = await fetch(
       `https://www.bookingmood.com/api/organizations/${organization.id}/widgets`,
       { headers: { Authorization: this.pluginScoped.apiKey } }
     ).then((res) => res.json());
-    this.pluginScoped.widgetOptions = widgets.map((widget) => ({
+    this.pluginScoped.widgetOptions = res.data.map((widget) => ({
       name: widget.title || widget.id,
       type: widget.type,
       id: widget.id,
