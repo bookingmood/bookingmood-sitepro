@@ -43,7 +43,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       `https://www.bookingmood.com/api/websitebuilder/widget-currencies`
     ).then((res) => res.json());
     this.pluginScoped.currencyOptions = [
-      { name: "Default for organization", value: "default" },
+      { name: "Default for organization", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
     ];
     field.setOptions(this.pluginScoped.currencyOptions);
@@ -54,7 +54,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       `https://www.bookingmood.com/api/websitebuilder/widget-fonts`
     ).then((res) => res.json());
     this.pluginScoped.fontOptions = [
-      { name: "Default", value: "default" },
+      { name: "Default", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
     ];
     field.setOptions(this.pluginScoped.fontOptions);
@@ -65,7 +65,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       `https://www.bookingmood.com/api/websitebuilder/widget-locales`
     ).then((res) => res.json());
     this.pluginScoped.localeOptions = [
-      { name: "Default", value: "default" },
+      { name: "Default", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
     ];
     field.setOptions(this.pluginScoped.localeOptions);
