@@ -13,6 +13,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
   },
   pluginScoped: {
     apiKey: null,
+    initialWidgetId: null,
     widgetOptions: [{ name: "Select a widget", id: "default" }],
     currencyOptions: [{ name: "Default", id: "default" }],
     fontOptions: [{ name: "Default", id: "default" }],
@@ -76,20 +77,33 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
         priority: 0,
         children: [
           {
-            type: "VerticalLayout",
+            type: "HorizontalLayout",
+            columnWeights: [8, 4],
             children: [
               {
-                type: "Label",
-                text: "Bookingmood API key",
-                helpText:
-                  "Use an existing API key, or create a new one in the bookingmood admin panel (settings -> api access)",
+                type: "VerticalLayout",
+                children: [
+                  {
+                    type: "Label",
+                    text: "Bookingmood API key",
+                    helpText:
+                      "Use an existing API key, or create a new one in the bookingmood admin panel (settings -> api access)",
+                  },
+                  { type: "TextField", id: "api_key" },
+                ],
               },
               {
-                type: "TextField",
-                id: "api_key",
-                change: async (fields) => {
-                  console.log(fields.api_key.getValue());
+                type: "Button",
+                click: async (fields) => {
+                  const apiKey = fields.api_key.getValue();
+                  if (!apiKey) return;
+                  this.pluginScoped.apiKey = apiKey;
+                  this.loadWidgets(
+                    fields.widget,
+                    this.pluginScoped.initialWidgetId
+                  );
                 },
+                text: "Load widgets",
               },
             ],
           },
@@ -310,6 +324,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
   openAction: function (fields, data, elem) {
     // General
     this.pluginScoped.apiKey = data.content.api_key || null;
+    this.pluginScoped.initialWidgetId = data.content.widget_id || null;
     fields.api_key.setText(data.content.api_key);
     fields.widget_id.selectItem(
       fields.locale.getItemById(data.content.widget_id || "default")
@@ -366,15 +381,16 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     // Load upstream options
     if (this.pluginScoped.apiKey)
       this.loadWidgets(fields.widget_id, data.content.widget_id);
-    if (this.pluginScoped.currencyOptions.length === 0)
+    if (this.pluginScoped.currencyOptions.length === 1)
       this.loadCurrencyOptions(fields.currency, data.content.currency);
-    if (this.pluginScoped.fontOptions.length === 0)
+    if (this.pluginScoped.fontOptions.length === 1)
       this.loadFontOptions(fields.font, data.content.font);
-    if (this.pluginScoped.localeOptions.length === 0)
+    if (this.pluginScoped.localeOptions.length === 1)
       this.loadLocaleOptions(fields.locale, data.content.locale);
   },
   applyAction: function (fields, data, elem) {
     // General
+    data.content.api_key = fields.api_key.getText() || null;
     if (fields.widget_id.getSelectedItem()) {
       data.content.widget_id = fields.widget_id
         .getSelectedItem()
