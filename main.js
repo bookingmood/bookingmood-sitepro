@@ -1,3 +1,8 @@
+const defaultWidgetOptions = [{ name: "Select a widget", id: "default" }];
+const defaultCurrencyOptions = [{ name: "Default", id: "default" }];
+const defaultFontOptions = [{ name: "Default", id: "default" }];
+const defaultLocaleOptions = [{ name: "Default", id: "default" }];
+
 PluginWrapper.registerPlugin("bookingmood_calendar", {
   name: "Bookingmood calendar",
   element: {
@@ -95,7 +100,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "widget_id",
-                options: this.pluginScoped.widgetOptions,
+                options: defaultWidgetOptions,
               },
             ],
           },
@@ -112,7 +117,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "locale",
-                options: this.pluginScoped.localeOptions,
+                options: defaultLocaleOptions,
               },
             ],
           },
@@ -158,7 +163,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "currency",
-                options: this.pluginScoped.currencyOptions,
+                options: defaultCurrencyOptions,
               },
             ],
           },
@@ -294,7 +299,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "DropdownBox",
                 id: "font",
-                options: this.pluginScoped.fontOptions,
+                options: defaultFontOptions,
               },
             ],
           },
