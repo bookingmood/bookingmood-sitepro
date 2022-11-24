@@ -22,14 +22,13 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     localeOptions: [{ name: "Default", id: "default" }],
   },
   async loadWidgets(field, value) {
-    console.log("loadWidgets");
     const organization = await fetch(
       `https://www.bookingmood.com/api/organizations`,
-      { headers: { Authorization: `Bearer ${this.pluginScoped.apiKey}` } }
+      { headers: { Authorization: this.pluginScoped.apiKey } }
     ).then((res) => res.json());
     const widgets = await fetch(
       `https://www.bookingmood.com/api/organizations/${organization.id}/widgets`,
-      { headers: { Authorization: `Bearer ${this.pluginScoped.apiKey}` } }
+      { headers: { Authorization: this.pluginScoped.apiKey } }
     ).then((res) => res.json());
     this.pluginScoped.widgetOptions = widgets.map((widget) => ({
       name: widget.title || widget.id,
