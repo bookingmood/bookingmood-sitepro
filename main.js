@@ -3,6 +3,8 @@ const defaultCurrencyOptions = [{ name: "Default", id: "default" }];
 const defaultFontOptions = [{ name: "Default", id: "default" }];
 const defaultLocaleOptions = [{ name: "Default", id: "default" }];
 
+let bmWidgetWrapper;
+
 PluginWrapper.registerPlugin("bookingmood_calendar", {
   name: "Bookingmood calendar",
   element: {
@@ -98,10 +100,10 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 click: async (event, fields) => {
                   const apiKey = fields.api_key.getText();
                   if (!apiKey) return;
-                  this.pluginScoped.apiKey = apiKey;
-                  this.loadWidgets(
+                  bmWidgetWrapper.pluginScoped.apiKey = apiKey;
+                  bmWidgetWrapper.loadWidgets(
                     fields.widget,
-                    this.pluginScoped.initialWidgetId
+                    bmWidgetWrapper.pluginScoped.initialWidgetId
                   );
                 },
                 text: "Load widgets",
@@ -323,6 +325,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     ],
   },
   openAction: function (fields, data, elem) {
+    bmWidgetWrapper = this;
     // General
     this.pluginScoped.apiKey = data.content.api_key || null;
     this.pluginScoped.initialWidgetId = data.content.widget_id || null;
