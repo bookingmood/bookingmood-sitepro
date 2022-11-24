@@ -20,6 +20,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     localeOptions: [{ name: "Default", id: "default" }],
   },
   async loadWidgets(field, value) {
+    console.log("loadWidgets");
     const organization = await fetch(
       `https://www.bookingmood.com/api/organizations`,
       { headers: { Authorization: `Bearer ${this.pluginScoped.apiKey}` } }
@@ -47,7 +48,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     field.setOptions(this.pluginScoped.currencyOptions);
     field.selectItem(field.getItemById(value || "default"));
   },
-  async loadFontOptions() {
+  async loadFontOptions(field, value) {
     const { options } = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-fonts`
     ).then((res) => res.json());
@@ -58,7 +59,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     field.setOptions(this.pluginScoped.fontOptions);
     field.selectItem(field.getItemById(value || "default"));
   },
-  async loadLocaleOptions() {
+  async loadLocaleOptions(field, value) {
     const { options } = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-locales`
     ).then((res) => res.json());
@@ -156,7 +157,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               { type: "Label", text: "First week contains date" },
               {
                 type: "DropdownBox",
-                id: "fist_week_contains_date",
+                id: "first_week_contains_date",
                 options: [
                   { name: "Default for language", id: "default" },
                   { name: "January 1st", id: "1" },
