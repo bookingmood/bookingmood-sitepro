@@ -39,6 +39,12 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               },
             ],
           },
+        ],
+      },
+      {
+        name: "Localization",
+        priority: 1,
+        children: [
           {
             type: "VerticalLayout",
             children: [
@@ -47,18 +53,53 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 type: "DropdownBox",
                 id: "locale",
                 options: [
-                  { name: "English", value: "en-US" },
-                  { name: "Nederlands", value: "nl-NL" },
+                  { name: "English", id: "en-US" },
+                  { name: "Nederlands", id: "nl-NL" },
                 ],
               },
             ],
           },
-        ],
-      },
-      {
-        name: "Localization",
-        priority: 1,
-        children: [
+          {
+            type: "VerticalLayout",
+            children: [
+              {
+                type: "Label",
+                text: "Week starts on",
+              },
+              {
+                type: "DropdownBox",
+                id: "week_starts_on",
+                options: [
+                  { name: "Default for language", id: "" },
+                  { name: "Sunday", id: "0" },
+                  { name: "Monday", id: "1" },
+                ],
+              },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              {
+                type: "Label",
+                text: "First week contains date",
+              },
+              {
+                type: "DropdownBox",
+                id: "fist_week_contains_date",
+                options: [
+                  { name: "Default for language", id: "" },
+                  { name: "January 1st", id: "1" },
+                  { name: "January 2nd", id: "2" },
+                  { name: "January 3rd", id: "3" },
+                  { name: "January 4th", id: "4" },
+                  { name: "January 5th", id: "5" },
+                  { name: "January 6th", id: "6" },
+                  { name: "January 7th", id: "7" },
+                ],
+              },
+            ],
+          },
           {
             type: "VerticalLayout",
             children: [
@@ -70,8 +111,149 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 type: "DropdownBox",
                 id: "currency",
                 options: [
-                  { name: "Euro", value: "EUR" },
-                  { name: "US Dollar", value: "USD" },
+                  { name: "Default", id: "" },
+                  { name: "Euro", id: "EUR" },
+                  { name: "US Dollar", id: "USD" },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Layout",
+        priority: 1,
+        children: [
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Size" },
+              {
+                type: "RadioBox",
+                id: "size_regular",
+                label: "Regular",
+                group: "size",
+              },
+              {
+                type: "RadioBox",
+                id: "size_compact",
+                label: "Compact",
+                group: "size",
+              },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              {
+                type: "CheckBox",
+                id: "display_product_name",
+                label: "Display rental name",
+              },
+              {
+                type: "CheckBox",
+                id: "display_product_images",
+                label: "Display rental images",
+              },
+              {
+                type: "CheckBox",
+                id: "display_week_numbers",
+                label: "Display week numbers",
+              },
+              {
+                type: "CheckBox",
+                id: "display_legend",
+                label: "Display legend",
+              },
+              {
+                type: "CheckBox",
+                id: "stay_expanded",
+                label: "Always show booking form",
+              },
+              {
+                type: "CheckBox",
+                id: "show_bookingmood_branding",
+                label: "Show branding",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Theme",
+        priority: 1,
+        children: [
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Theme" },
+              {
+                type: "RadioBox",
+                id: "theme_modern",
+                label: "Modern",
+                group: "theme",
+              },
+              {
+                type: "RadioBox",
+                id: "theme_classic",
+                label: "Classic",
+                group: "theme",
+              },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Background color" },
+              { type: "ColorSelector", id: "background_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Text color" },
+              { type: "ColorSelector", id: "text_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Accent color" },
+              { type: "ColorSelector", id: "accent_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Available color" },
+              { type: "ColorSelector", id: "available_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Pending color" },
+              { type: "ColorSelector", id: "tentative_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Unavailable color" },
+              { type: "ColorSelector", id: "unavailable_color" },
+            ],
+          },
+          {
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Font" },
+              {
+                type: "DropdownBox",
+                id: "font",
+                options: [
+                  { name: "Default", id: "" },
+                  { name: "Arial", id: "Arial" },
+                  { name: "Helvetica", id: "Helvetica" },
                 ],
               },
             ],
@@ -87,11 +269,15 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     // Localization
     const locale = fields.locale.getItemById(data.content.locale);
     if (locale) fields.locale.selectItem(locale);
-    fields.week_starts_on_default.setValue(
-      data.content.week_starts_on === null
+    const weekStartsOn = fields.week_starts_on.getItemById(
+      data.content.week_starts_on === 1
+        ? "1"
+        : data.content.week_starts_on === 0
+        ? "0"
+        : ""
     );
-    fields.week_starts_on_sunday.setValue(data.content.week_starts_on === 0);
-    fields.week_starts_on_monday.setValue(data.content.week_starts_on === 1);
+    if (weekStartsOn) fields.week_starts_on.selectItem(weekStartsOn);
+    console.log(fields);
 
     const firstWeekContainsDate = fields.first_week_contains_date.getItemById(
       data.content.first_week_contains_date
