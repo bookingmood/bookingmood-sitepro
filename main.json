@@ -1,3 +1,9 @@
 {
-	"fixedHeight": true
+  "type": "generic",
+  "requireStoreModule": false,
+  "requireBillingInfo": false,
+  "fixedHeight": true,
+  "requireJsLibs": [],
+  "loadModules": [],
+  "admin": false
 }
