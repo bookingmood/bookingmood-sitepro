@@ -21,7 +21,6 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     noScroll: true,
     tabs: [
       {
-        name: "General",
         children: [
           {
             type: "VerticalLayout",
@@ -38,51 +37,19 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               },
             ],
           },
-        ],
-      },
-      {
-        name: "Localization",
-        children: [
-          { type: "Label", text: "Calendar name" },
           {
-            type: "TextField",
-            id: "calendar_name",
-            placeholder: "Calendar name",
-          },
-          { type: "Label", text: "Calendar name" },
-          {
-            type: "TextField",
-            id: "calendar_name",
-            placeholder: "Calendar name",
-          },
-          { type: "Label", text: "Calendar name" },
-          {
-            type: "TextField",
-            id: "calendar_name",
-            placeholder: "Calendar name",
-          },
-        ],
-      },
-      {
-        name: "Layout",
-        children: [
-          { type: "Label", text: "Calendar name" },
-          {
-            type: "TextField",
-            id: "calendar_name",
-            placeholder: "Calendar name",
-          },
-        ],
-      },
-      ,
-      {
-        name: "Theme",
-        children: [
-          { type: "Label", text: "Calendar name" },
-          {
-            type: "TextField",
-            id: "calendar_name",
-            placeholder: "Calendar name",
+            type: "VerticalLayout",
+            children: [
+              { type: "Label", text: "Language" },
+              {
+                type: "DropdownBox",
+                id: "locale",
+                options: [
+                  { name: "English", value: "en-US" },
+                  { name: "Nederlands", value: "nl-NL" },
+                ],
+              },
+            ],
           },
         ],
       },
