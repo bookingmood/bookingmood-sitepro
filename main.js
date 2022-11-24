@@ -96,7 +96,8 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
               {
                 type: "Button",
                 click: async (fields) => {
-                  const apiKey = fields.api_key.getValue();
+                  console.log(fields, this);
+                  const apiKey = fields.api_key.getText();
                   if (!apiKey) return;
                   this.pluginScoped.apiKey = apiKey;
                   this.loadWidgets(
