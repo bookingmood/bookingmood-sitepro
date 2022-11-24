@@ -5,8 +5,8 @@ const defaultLocaleOptions = [];
 
 let bmWidgetWrapper;
 
-PluginWrapper.registerPlugin("bookingmood_calendar", {
-  name: "Bookingmood calendar",
+PluginWrapper.registerPlugin("bookingmood", {
+  name: "Bookingmood widget",
   element: {
     minSize: { width: 64, height: 64 },
     defaultSize: { width: 800, height: 256 },
@@ -40,8 +40,8 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       fields.widget_id.getItemById(value || "default")
     );
     if (fields.widget_id.getSelectedItem()) {
-      const type = fields.widget_id.getSelectedItem().getOriginal().type;
-      console.log(type, fields);
+      // const type = fields.widget_id.getSelectedItem().getOriginal().type;
+      console.log(this, fields);
     }
   },
   async loadCurrencyOptions(fields, value) {
