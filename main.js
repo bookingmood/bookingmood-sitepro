@@ -1,14 +1,3 @@
-const first_week_contains_date_options = [
-  { key: "default", label: "Default", value: null },
-  { key: 1, label: "January 1st", value: 1 },
-  { key: 2, label: "January 2nd", value: 2 },
-  { key: 3, label: "January 3rd", value: 3 },
-  { key: 4, label: "January 4th", value: 4 },
-  { key: 5, label: "January 5th", value: 5 },
-  { key: 6, label: "January 6th", value: 6 },
-  { key: 7, label: "January 7th", value: 7 },
-];
-
 PluginWrapper.registerPlugin("bookingmood_calendar", {
   name: "Bookingmood calendar",
   element: {
@@ -16,6 +5,11 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     defaultSize: { width: 800, height: 256 },
     initialFullWidth: true,
     resizable: true,
+  },
+  pluginScoped: {
+    currencyOptions: [],
+    fontOptions: [],
+    localeOptions: [],
   },
   propertyDialog: {
     noScroll: true,
@@ -53,6 +47,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 type: "DropdownBox",
                 id: "locale",
                 options: [
+                  { name: "Default", id: "default" },
                   { name: "English", id: "en-US" },
                   { name: "Nederlands", id: "nl-NL" },
                 ],
@@ -62,15 +57,12 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
           {
             type: "VerticalLayout",
             children: [
-              {
-                type: "Label",
-                text: "Week starts on",
-              },
+              { type: "Label", text: "Week starts on" },
               {
                 type: "DropdownBox",
                 id: "week_starts_on",
                 options: [
-                  { name: "Default for language", id: "" },
+                  { name: "Default for language", id: "default" },
                   { name: "Sunday", id: "0" },
                   { name: "Monday", id: "1" },
                 ],
@@ -80,15 +72,12 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
           {
             type: "VerticalLayout",
             children: [
-              {
-                type: "Label",
-                text: "First week contains date",
-              },
+              { type: "Label", text: "First week contains date" },
               {
                 type: "DropdownBox",
                 id: "fist_week_contains_date",
                 options: [
-                  { name: "Default for language", id: "" },
+                  { name: "Default for language", id: "default" },
                   { name: "January 1st", id: "1" },
                   { name: "January 2nd", id: "2" },
                   { name: "January 3rd", id: "3" },
@@ -103,15 +92,12 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
           {
             type: "VerticalLayout",
             children: [
-              {
-                type: "Label",
-                text: "Currency",
-              },
+              { type: "Label", text: "Currency" },
               {
                 type: "DropdownBox",
                 id: "currency",
                 options: [
-                  { name: "Default", id: "" },
+                  { name: "Default", id: "default" },
                   { name: "Euro", id: "EUR" },
                   { name: "US Dollar", id: "USD" },
                 ],
@@ -251,7 +237,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 type: "DropdownBox",
                 id: "font",
                 options: [
-                  { name: "Default", id: "" },
+                  { name: "Default", id: "default" },
                   { name: "Arial", id: "Arial" },
                   { name: "Helvetica", id: "Helvetica" },
                 ],
@@ -263,32 +249,33 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     ],
   },
   openAction: function (fields, data, elem) {
+    console.log(fields, data, elem, this);
     // General
     fields.widget_id.setText(data.content.widget_id);
 
     // Localization
-    const locale = fields.locale.getItemById(data.content.locale);
-    if (locale) fields.locale.selectItem(locale);
-    const weekStartsOn = fields.week_starts_on.getItemById(
-      data.content.week_starts_on === 1
-        ? "1"
-        : data.content.week_starts_on === 0
-        ? "0"
-        : ""
+    fields.locale.selectItem(fields.locale.getItemById(data.content.locale));
+    fields.week_starts_on.selectItem(
+      fields.week_starts_on.getItemById(
+        isNaN(data.content.week_starts_on)
+          ? "default"
+          : parseInt(data.content.week_starts_on, 10)
+      )
     );
-    if (weekStartsOn) fields.week_starts_on.selectItem(weekStartsOn);
-    console.log(fields);
 
-    const firstWeekContainsDate = fields.first_week_contains_date.getItemById(
-      data.content.first_week_contains_date
+    fields.first_week_contains_date.selectItem(
+      fields.first_week_contains_date.getItemById(
+        data.content.first_week_contains_date
+          ? `${data.content.first_week_contains_date}`
+          : "default"
+      )
     );
-    if (firstWeekContainsDate)
-      fields.first_week_contains_date.selectItem(firstWeekContainsDate);
-    const currency = fields.currency.getItemById(data.content.currency);
-    if (currency) fields.currency.selectItem(currency);
+    fields.currency.selectItem(
+      fields.currency.getItemById(data.content.currency || "default")
+    );
 
     // Layout
-    fields.size_regular.setValue(data.content.size === "regular");
+    fields.size_regular.setValue(data.content.size !== "compact");
     fields.size_compact.setValue(data.content.size === "compact");
     fields.display_product_name.setValue(data.content.display_product_name);
     fields.display_product_images.setValue(data.content.display_product_images);
@@ -300,34 +287,58 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     );
 
     // Theme
+    fields.theme_modern.setValue(data.content.theme !== "classic");
     fields.theme_classic.setValue(data.content.theme === "classic");
-    fields.theme_modern.setValue(data.content.theme === "modern");
     fields.background_color.setValue(`#${data.content.background_color}`);
     fields.text_color.setValue(`#${data.content.text_color}`);
     fields.accent_color.setValue(`#${data.content.unavailable_color}`);
     fields.available_color.setValue(`#${data.content.available_color}`);
     fields.tentative_color.setValue(`#${data.content.tentative_color}`);
     fields.unavailable_color.setValue(`#${data.content.unavailable_color}`);
-    const font = fields.font.getItemById(data.content.font);
-    if (font) fields.font.selectItem(font);
+    fields.font.selectItem(
+      fields.font.getItemById(data.content.font || "default")
+    );
+
+    // Load upstream options
   },
   applyAction: function (fields, data, elem) {
     // General
     data.content.widget_id = fields.widget_id.getText();
 
     // Localization
-    data.content.locale = fields.locale.getSelectedItem().getOriginal().id;
-    data.content.week_starts_on = fields.week_starts_on
-      .getSelectedItem()
-      .getOriginal().id;
+    if (fields.locale.getSelectedItem()) {
+      data.content.locale = fields.locale.getSelectedItem().getOriginal().id;
+      if (data.content.locale === "default") data.content.locale = null;
+    }
+    if (fields.week_starts_on.getSelectedItem()) {
+      data.content.week_starts_on = fields.week_starts_on
+        .getSelectedItem()
+        .getOriginal().id;
+      data.content.week_starts_on =
+        data.content.week_starts_on === "default"
+          ? null
+          : parseInt(data.content.week_starts_on, 10);
+    }
 
-    data.content.first_week_contains_date = fields.first_week_contains_date
-      .getSelectedItem()
-      .getOriginal().id;
-    data.content.currency = fields.currency.getSelectedItem().getOriginal().id;
+    if (fields.first_week_contains_date.getSelectedItem()) {
+      data.content.first_week_contains_date = fields.first_week_contains_date
+        .getSelectedItem()
+        .getOriginal().id;
+      data.content.first_week_contains_date =
+        data.content.first_week_contains_date === "default"
+          ? null
+          : parseInt(data.content.first_week_contains_date, 10);
+    }
+
+    if (fields.currency.getSelectedItem()) {
+      data.content.currency = fields.currency
+        .getSelectedItem()
+        .getOriginal().id;
+      if (data.content.currency === "default") data.content.currency = null;
+    }
 
     // Layout
-    data.content.size = fields.size_regular.getValue() ? "regular" : "compact";
+    data.content.size = fields.size_compact.getValue() ? "compact" : "regular";
 
     data.content.display_product_name = fields.display_product_name.getValue();
     data.content.display_product_images =
@@ -354,7 +365,10 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     data.content.unavailable_color = fields.unavailable_color
       .getValue()
       .replace("#", "");
-    data.content.font = fields.font.getSelectedItem().getOriginal().id;
+    if (fields.font.getSelectedItem()) {
+      data.content.font = fields.font.getSelectedItem().getOriginal().id;
+      if (data.content.font === "default") data.content.font = null;
+    }
   },
   loadAction: function (data) {
     const content = data.content;
