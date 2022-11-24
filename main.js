@@ -1,7 +1,7 @@
 const defaultWidgetOptions = [{ name: "Select a widget", id: "default" }];
 const defaultCurrencyOptions = [{ name: "Default", id: "default" }];
 const defaultFontOptions = [{ name: "Default", id: "default" }];
-const defaultLocaleOptions = [{ name: "Default", id: "default" }];
+const defaultLocaleOptions = [];
 
 let bmWidgetWrapper;
 
@@ -21,7 +21,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     fontOptions: [{ name: "Default", id: "default" }],
     localeOptions: [{ name: "Default", id: "default" }],
   },
-  async loadWidgets(field, value) {
+  async loadWidgets(fields, value) {
     const organization = await fetch(
       `https://www.bookingmood.com/api/organizations`,
       { headers: { Authorization: this.pluginScoped.apiKey } }
@@ -31,14 +31,20 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       { headers: { Authorization: this.pluginScoped.apiKey } }
     ).then((res) => res.json());
     this.pluginScoped.widgetOptions = res.data.map((widget) => ({
-      name: widget.title || widget.id,
+      name: widget.title || `${widget.type} ${widget.id}`,
       type: widget.type,
       id: widget.id,
     }));
-    field.setOptions(this.pluginScoped.widgetOptions);
-    field.selectItem(field.getItemById(value || "default"));
+    fields.widget_id.setOptions(this.pluginScoped.widgetOptions);
+    fields.widget_id.selectItem(
+      fields.widget_id.getItemById(value || "default")
+    );
+    if (fields.widget_id.getSelectedItem()) {
+      const type = fields.widget_id.getSelectedItem().getOriginal().type;
+      console.log(type, fields);
+    }
   },
-  async loadCurrencyOptions(field, value) {
+  async loadCurrencyOptions(fields, value) {
     const { options } = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-currencies`
     ).then((res) => res.json());
@@ -46,10 +52,10 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       { name: "Default for organization", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
     ];
-    field.setOptions(this.pluginScoped.currencyOptions);
-    field.selectItem(field.getItemById(value || "default"));
+    fields.currency.setOptions(this.pluginScoped.currencyOptions);
+    fields.currency.selectItem(fields.currency.getItemById(value || "default"));
   },
-  async loadFontOptions(field, value) {
+  async loadFontOptions(fields, value) {
     const { options } = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-fonts`
     ).then((res) => res.json());
@@ -57,19 +63,19 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
       { name: "Default", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
     ];
-    field.setOptions(this.pluginScoped.fontOptions);
-    field.selectItem(field.getItemById(value || "default"));
+    fields.font.setOptions(this.pluginScoped.fontOptions);
+    fields.font.selectItem(fields.font.getItemById(value || "default"));
   },
-  async loadLocaleOptions(field, value) {
+  async loadLocaleOptions(fields, value) {
     const { options } = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-locales`
     ).then((res) => res.json());
-    this.pluginScoped.localeOptions = [
-      { name: "Default", id: "default" },
-      ...options.map((option) => ({ name: option.label, id: option.value })),
-    ];
-    field.setOptions(this.pluginScoped.localeOptions);
-    field.selectItem(field.getItemById(value || "default"));
+    this.pluginScoped.localeOptions = options.map((option) => ({
+      name: option.label,
+      id: option.value,
+    }));
+    fields.locale.setOptions(this.pluginScoped.localeOptions);
+    fields.locale.selectItem(fields.locale.getItemById(value || "en-US"));
   },
   propertyDialog: {
     noScroll: true,
@@ -101,7 +107,7 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                   if (!apiKey) return;
                   bmWidgetWrapper.pluginScoped.apiKey = apiKey;
                   bmWidgetWrapper.loadWidgets(
-                    fields.widget,
+                    fields,
                     bmWidgetWrapper.pluginScoped.initialWidgetId
                   );
                 },
@@ -383,13 +389,13 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
 
     // Load upstream options
     if (this.pluginScoped.apiKey)
-      this.loadWidgets(fields.widget_id, data.content.widget_id);
+      this.loadWidgets(fields, data.content.widget_id);
     if (this.pluginScoped.currencyOptions.length === 1)
-      this.loadCurrencyOptions(fields.currency, data.content.currency);
+      this.loadCurrencyOptions(fields, data.content.currency);
     if (this.pluginScoped.fontOptions.length === 1)
-      this.loadFontOptions(fields.font, data.content.font);
+      this.loadFontOptions(fields, data.content.font);
     if (this.pluginScoped.localeOptions.length === 1)
-      this.loadLocaleOptions(fields.locale, data.content.locale);
+      this.loadLocaleOptions(fields, data.content.locale);
   },
   applyAction: function (fields, data, elem) {
     // General
