@@ -21,6 +21,8 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
     noScroll: true,
     tabs: [
       {
+        name: "General",
+        priority: 0,
         children: [
           {
             type: "VerticalLayout",
@@ -47,6 +49,29 @@ PluginWrapper.registerPlugin("bookingmood_calendar", {
                 options: [
                   { name: "English", value: "en-US" },
                   { name: "Nederlands", value: "nl-NL" },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Localization",
+        priority: 1,
+        children: [
+          {
+            type: "VerticalLayout",
+            children: [
+              {
+                type: "Label",
+                text: "Currency",
+              },
+              {
+                type: "DropdownBox",
+                id: "currency",
+                options: [
+                  { name: "Euro", value: "EUR" },
+                  { name: "US Dollar", value: "USD" },
                 ],
               },
             ],
