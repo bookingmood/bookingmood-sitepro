@@ -8,7 +8,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     minSize: { width: 64, height: 64 },
     defaultSize: { width: 800, height: 256 },
     initialFullWidth: true,
-    resizable: true,
+    resizable: false,
   },
   async loadWidgets() {
     bmWidgetFields.api_key_button.setText("Loading...");
