@@ -539,7 +539,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       fields.week_starts_on.getItemById(
         isNaN(data.content.week_starts_on)
           ? "default"
-          : parseInt(data.content.week_starts_on, 10)
+          : `${data.content.week_starts_on}`
       )
     );
 
