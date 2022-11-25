@@ -693,20 +693,7 @@ PluginWrapper.registerPlugin("bookingmood", {
   loadAction: function (data) {
     this.updateUrlParams(data);
   },
-  loadedAction: function (data, container) {
+  loadedAction: function (data) {
     this.updateUrlParams(data);
-
-    const onMessage = (event) => {
-      if (!event.source) return;
-      try {
-        const data = JSON.parse(event.data);
-        const frame = container[0].querySelector("iframe");
-        if (data.context !== "iframe.resize" || data.src !== frame.src) return;
-        frame.height = data.height + 1;
-        this.setSize(frame.width, frame.height);
-      } catch {}
-    };
-
-    window.addEventListener("message", onMessage);
   },
 });

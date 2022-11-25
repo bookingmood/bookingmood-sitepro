@@ -7,6 +7,21 @@
   style="width: 100%; border: 0; border-radius: 4px; overflow: hidden"
   allowfullscreen
 />
+<script>
+  if (!window.bmResizeInitialized) {
+    window.bmResizeInitialized = true;
+    window.addEventListener("message", (event) => {
+      if (!event.source) return;
+      try {
+        const data = JSON.parse(event.data);
+        if (data.context !== "iframe.resize") return;
+        const frame = document.querySelector(`iframe[src="${data.src}"]`);
+        if (!frame) return;
+        frame.height = data.height + 1;
+      } catch {}
+    });
+  }
+</script>
 {{/content.widget_id}}{{^content.widget_id}}
 <p>No Bookingmood widget selected</p>
 {{/content.widget_id}}
