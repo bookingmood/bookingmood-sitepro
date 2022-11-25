@@ -594,12 +594,20 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
 
     // Theme
-    fields.background_color.setValue(`#${data.content.background_color}`);
-    fields.text_color.setValue(`#${data.content.text_color}`);
-    fields.accent_color.setValue(`#${data.content.accent_color}`);
-    fields.available_color.setValue(`#${data.content.available_color}`);
-    fields.tentative_color.setValue(`#${data.content.tentative_color}`);
-    fields.unavailable_color.setValue(`#${data.content.unavailable_color}`);
+    fields.background_color.setValue(
+      `#${data.content.background_color ?? "ffffff"}`
+    );
+    fields.text_color.setValue(`#${data.content.text_color ?? "000000"}`);
+    fields.accent_color.setValue(`#${data.content.accent_color ?? "ef4444"}`);
+    fields.available_color.setValue(
+      `#${data.content.available_color ?? "22c55e"}`
+    );
+    fields.tentative_color.setValue(
+      `#${data.content.tentative_color ?? "f59e0b"}`
+    );
+    fields.unavailable_color.setValue(
+      `#${data.content.unavailable_color ?? "ef4444"}`
+    );
 
     // Load upstream options
     this.updateFieldVisibility();
