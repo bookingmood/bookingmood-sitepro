@@ -1,10 +1,6 @@
-const defaultWidgetOptions = [{ name: "Select a widget", id: "default" }];
-const defaultCurrencyOptions = [{ name: "Default", id: "default" }];
-const defaultFontOptions = [{ name: "Default", id: "default" }];
-const defaultLocaleOptions = [];
-
 let bmWidgetWrapper;
 let bmWidgetFields;
+let bmWidgetData;
 
 PluginWrapper.registerPlugin("bookingmood", {
   name: "Bookingmood widget",
@@ -14,70 +10,205 @@ PluginWrapper.registerPlugin("bookingmood", {
     initialFullWidth: true,
     resizable: true,
   },
-  pluginScoped: {
-    apiKey: null,
-    initialWidgetId: null,
-    widgetOptions: [{ name: "Select a widget", id: "default" }],
-    currencyOptions: [{ name: "Default", id: "default" }],
-    fontOptions: [{ name: "Default", id: "default" }],
-    localeOptions: [{ name: "Default", id: "default" }],
-  },
-  async loadWidgets(fields, value) {
-    const organization = await fetch(
+  async loadWidgets() {
+    bmWidgetFields.api_key_button.setText("Loading...");
+    bmWidgetFields.api_key_button.setEnabled(false);
+    const organizationRes = await fetch(
       `https://www.bookingmood.com/api/organizations`,
-      { headers: { Authorization: this.pluginScoped.apiKey } }
-    ).then((res) => res.json());
-    const res = await fetch(
-      `https://www.bookingmood.com/api/organizations/${organization.id}/widgets`,
-      { headers: { Authorization: this.pluginScoped.apiKey } }
-    ).then((res) => res.json());
-    this.pluginScoped.widgetOptions = res.data.map((widget) => ({
-      name: widget.title || `${widget.type} ${widget.id}`,
-      type: widget.type,
-      id: widget.id,
-    }));
-    fields.widget_id.setOptions(this.pluginScoped.widgetOptions);
-    fields.widget_id.selectItem(
-      fields.widget_id.getItemById(value || "default")
+      { headers: { Authorization: bmWidgetData.content.api_key } }
     );
-    if (fields.widget_id.getSelectedItem()) {
-      console.log(bmWidgetWrapper, bmWidgetFields);
-      // const type = fields.widget_id.getSelectedItem().getOriginal().type;
-      // console.log(this, fields);
+    if (!organizationRes.ok) {
+      bmWidgetFields.api_key.setError("Invalid API key");
+      bmWidgetFields.widget_id_field.setVisible(false);
+      bmWidgetFields.widget_id.setOptions([]);
+      bmWidgetFields.api_key_button.setText(
+        bmWidgetData.content.api_key ? "Update" : "Confirm"
+      );
+      bmWidgetFields.api_key_button.setEnabled(true);
+      return;
     }
+
+    const organization = await organizationRes.json();
+
+    const widgetsRes = await fetch(
+      `https://www.bookingmood.com/api/organizations/${organization.id}/widgets`,
+      { headers: { Authorization: bmWidgetData.content.api_key } }
+    );
+    if (!widgetsRes.ok) {
+      bmWidgetFields.api_key.setError("Invalid API key");
+      bmWidgetFields.widget_id_field.setVisible(false);
+      bmWidgetFields.widget_id.setOptions([]);
+      bmWidgetFields.api_key_button.setText(
+        bmWidgetData.content.api_key ? "Update" : "Confirm"
+      );
+      bmWidgetFields.api_key_button.setEnabled(true);
+      return;
+    }
+
+    const { data: widgets } = await widgetsRes.json();
+
+    bmWidgetFields.api_key.setError("");
+    bmWidgetFields.widget_id.setOptions(
+      widgets.map((widget) => ({
+        name: widget.title || `${widget.type} ${widget.id}`,
+        type: widget.type,
+        id: widget.id,
+      }))
+    );
+    bmWidgetFields.widget_id.selectItem(
+      bmWidgetFields.widget_id.getItemById(bmWidgetData.content.widget_id)
+    );
+    bmWidgetFields.widget_id_field.setVisible(true);
+    bmWidgetFields.api_key_button.setText(
+      bmWidgetData.content.api_key ? "Update" : "Confirm"
+    );
+    bmWidgetFields.api_key_button.setEnabled(true);
   },
-  async loadCurrencyOptions(fields, value) {
-    const { options } = await fetch(
+  async loadCurrencyOptions() {
+    const res = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-currencies`
-    ).then((res) => res.json());
-    this.pluginScoped.currencyOptions = [
+    );
+    if (!res.ok) {
+      bmWidgetFields.currency.setEnabled(false);
+      bmWidgetFields.currency.setError("Failed to load currencies");
+      return;
+    }
+    const { options } = await res.then((res) => res.json());
+    bmWidgetFields.currency.setEnabled(true);
+    bmWidgetFields.currency.setError("");
+    bmWidgetFields.currency.setOptions([
       { name: "Default for organization", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
-    ];
-    fields.currency.setOptions(this.pluginScoped.currencyOptions);
-    fields.currency.selectItem(fields.currency.getItemById(value || "default"));
+    ]);
+    bmWidgetFields.currency.selectItem(
+      bmWidgetFields.currency.getItemById(
+        bmWidgetData.content.currency || "default"
+      )
+    );
   },
-  async loadFontOptions(fields, value) {
-    const { options } = await fetch(
+  async loadFontOptions() {
+    const res = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-fonts`
-    ).then((res) => res.json());
-    this.pluginScoped.fontOptions = [
+    );
+    if (!res.ok) {
+      bmWidgetFields.font.setEnabled(false);
+      bmWidgetFields.font.setError("Failed to load fonts");
+      return;
+    }
+    const { options } = await res.then((res) => res.json());
+    bmWidgetFields.font.setEnabled(true);
+    bmWidgetFields.font.setError("");
+    bmWidgetFields.font.setOptions([
       { name: "Default", id: "default" },
       ...options.map((option) => ({ name: option.label, id: option.value })),
-    ];
-    fields.font.setOptions(this.pluginScoped.fontOptions);
-    fields.font.selectItem(fields.font.getItemById(value || "default"));
+    ]);
+    bmWidgetFields.font.selectItem(
+      bmWidgetFields.font.getItemById(bmWidgetData.content.font || "default")
+    );
   },
-  async loadLocaleOptions(fields, value) {
-    const { options } = await fetch(
+  async loadLocaleOptions() {
+    const res = await fetch(
       `https://www.bookingmood.com/api/websitebuilder/widget-locales`
-    ).then((res) => res.json());
-    this.pluginScoped.localeOptions = options.map((option) => ({
-      name: option.label,
-      id: option.value,
-    }));
-    fields.locale.setOptions(this.pluginScoped.localeOptions);
-    fields.locale.selectItem(fields.locale.getItemById(value || "en-US"));
+    );
+    if (!res.ok) {
+      bmWidgetFields.locale.setEnabled(false);
+      bmWidgetFields.locale.setError("Failed to load locales");
+      return;
+    }
+    const { options } = await res.then((res) => res.json());
+    bmWidgetFields.locale.setEnabled(true);
+    bmWidgetFields.locale.setError("");
+    bmWidgetFields.locale.setOptions(
+      options.map((option) => ({ name: option.label, id: option.value }))
+    );
+    bmWidgetFields.locale.selectItem(
+      bmWidgetFields.locale.getItemById(bmWidgetData.content.locale || "en-US")
+    );
+  },
+  updateFieldVisibility() {
+    bmWidgetFields.api_key_button.setText(
+      bmWidgetData.content.api_key ? "Update" : "Confirm"
+    );
+    bmWidgetFields.api_key_button.setEnabled(true);
+
+    bmWidgetFields.widget_id_field.setVisible(
+      bmWidgetFields.widget_id.optionsSource.length > 0
+    );
+
+    const widgetType = bmWidgetData.content.widget_type;
+
+    bmWidgetFields.size.setOptions(
+      ["calendar", "inventory", "search"].includes(widgetType)
+        ? [
+            { name: "Regular", id: "regular" },
+            { name: "Compact", id: "compact" },
+          ]
+        : widgetType === "timeline"
+        ? [
+            { name: "Responsive", id: "responsive" },
+            { name: "Compact", id: "compact" },
+            { name: "Wide", id: "wide" },
+          ]
+        : []
+    );
+    if (bmWidgetFields.size.optionsSource.length > 0) {
+      bmWidgetFields.size_field.setVisible(true);
+      bmWidgetFields.size.selectItem(
+        bmWidgetFields.size.getItemById(
+          bmWidgetData.content.size || bmWidgetFields.size.optionsSource[0].id
+        )
+      );
+    } else {
+      bmWidgetFields.size_field.setVisible(false);
+      bmWidgetFields.size.selectItem(null);
+    }
+
+    bmWidgetFields.theme.setOptions(
+      ["calendar", "timeline", "inventory"].includes(widgetType)
+        ? [
+            { name: "Modern", id: "modern" },
+            { name: "Classic", id: "classic" },
+          ]
+        : []
+    );
+    if (bmWidgetFields.theme.optionsSource.length > 0) {
+      bmWidgetFields.theme_field.setVisible(true);
+      bmWidgetFields.theme.selectItem(
+        bmWidgetFields.theme.getItemById(
+          bmWidgetData.content.theme || bmWidgetFields.theme.optionsSource[0].id
+        )
+      );
+    } else {
+      bmWidgetFields.theme_field.setVisible(false);
+      bmWidgetFields.theme.selectItem(null);
+    }
+
+    const theme = bmWidgetData.content.theme;
+    bmWidgetFields.display_product_covers.setVisible(widgetType === "timeline");
+    bmWidgetFields.display_product_name.setVisible(widgetType === "calendar");
+    bmWidgetFields.display_product_images.setVisible(widgetType === "calendar");
+    bmWidgetFields.display_tag_filter.setVisible(widgetType === "search");
+    bmWidgetFields.display_weekdays.setVisible(widgetType === "timeline");
+    bmWidgetFields.display_week_numbers.setVisible(
+      ["calendar", "inventory"].includes(widgetType)
+    );
+    bmWidgetFields.display_legend.setVisible(
+      ["calendar", "timeline", "inventory"].includes(widgetType)
+    );
+    bmWidgetFields.stay_expanded.setVisible(
+      ["calendar", "timeline", "inventory"].includes(widgetType)
+    );
+    bmWidgetFields.accent_color_field.setVisible(widgetType === "search");
+    bmWidgetFields.available_color_field.setVisible(
+      (["calendar", "timeline"].includes(widgetType) && theme === "classic") ||
+        widgetType === "inventory"
+    );
+    bmWidgetFields.tentative_color_field.setVisible(
+      ["calendar", "timeline"].includes(widgetType) && theme === "classic"
+    );
+    bmWidgetFields.unavailable_color_field.setVisible(
+      ["calendar", "timeline", "inventory"].includes(widgetType)
+    );
   },
   propertyDialog: {
     noScroll: true,
@@ -92,7 +223,6 @@ PluginWrapper.registerPlugin("bookingmood", {
             children: [
               {
                 type: "VerticalLayout",
-                id: "api_key_field",
                 children: [
                   {
                     type: "Label",
@@ -100,34 +230,45 @@ PluginWrapper.registerPlugin("bookingmood", {
                     helpText:
                       "Use an existing API key, or create a new one in the bookingmood admin panel (settings -> api access)",
                   },
-                  { type: "TextField", id: "api_key" },
+                  { type: "TextField", enabled: false, id: "api_key" },
                 ],
               },
               {
                 type: "Button",
                 id: "api_key_button",
-                click: async (event, fields) => {
-                  const apiKey = fields.api_key.getText();
-                  if (!apiKey) return;
-                  bmWidgetWrapper.pluginScoped.apiKey = apiKey;
-                  bmWidgetWrapper.loadWidgets(
-                    fields,
-                    bmWidgetWrapper.pluginScoped.initialWidgetId
-                  );
+                click: async () => {
+                  bmWidgetData.content.api_key =
+                    bmWidgetFields.api_key.getText() || null;
+                  bmWidgetWrapper.loadWidgets();
                 },
-                text: "Load widgets",
+                enabled: false,
+                text: "Loading",
               },
             ],
           },
           {
             type: "VerticalLayout",
             id: "widget_id_field",
+            visible: false,
             children: [
               { type: "Label", text: "Bookingmood widget" },
               {
                 type: "DropdownBox",
                 id: "widget_id",
-                options: defaultWidgetOptions,
+                options: [],
+                change: () => {
+                  if (bmWidgetFields.widget_id.getSelectedItem()) {
+                    const selectedWidget = fields.widget_id
+                      .getSelectedItem()
+                      .getOriginal();
+                    data.content.widget_id = selectedWidget.id;
+                    data.content.widget_type = selectedWidget.type;
+                  } else {
+                    data.content.widget_id = null;
+                    data.content.widget_type = null;
+                  }
+                  bmWidgetWrapper.updateFieldVisibility();
+                },
               },
             ],
           },
@@ -135,7 +276,6 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Localization",
-        id: "localization_tab",
         priority: 1,
         children: [
           {
@@ -145,7 +285,8 @@ PluginWrapper.registerPlugin("bookingmood", {
               {
                 type: "DropdownBox",
                 id: "locale",
-                options: defaultLocaleOptions,
+                enabled: false,
+                options: [],
               },
             ],
           },
@@ -191,7 +332,8 @@ PluginWrapper.registerPlugin("bookingmood", {
               {
                 type: "DropdownBox",
                 id: "currency",
-                options: defaultCurrencyOptions,
+                enabled: false,
+                options: [],
               },
             ],
           },
@@ -199,24 +341,27 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Layout",
-        id: "layout_tab",
         priority: 1,
         children: [
           {
             type: "VerticalLayout",
+            id: "size_field",
+            visible: false,
             children: [
               { type: "Label", text: "Size" },
               {
-                type: "RadioBox",
-                id: "size_regular",
-                label: "Regular",
-                group: "size",
-              },
-              {
-                type: "RadioBox",
-                id: "size_compact",
-                label: "Compact",
-                group: "size",
+                type: "DropdownBox",
+                id: "size",
+                enabled: false,
+                options: [],
+                change: () => {
+                  if (bmWidgetFields.size.getSelectedItem()) {
+                    bmWidgetData.content.size = bmWidgetFields.size
+                      .getSelectedItem()
+                      .getOriginal().id;
+                    bmWidgetWrapper.updateFieldVisibility();
+                  }
+                },
               },
             ],
           },
@@ -225,27 +370,50 @@ PluginWrapper.registerPlugin("bookingmood", {
             children: [
               {
                 type: "CheckBox",
+                id: "display_product_covers",
+                visible: false,
+                label: "Display rental images",
+              },
+              {
+                type: "CheckBox",
                 id: "display_product_name",
+                visible: false,
                 label: "Display rental name",
               },
               {
                 type: "CheckBox",
                 id: "display_product_images",
+                visible: false,
                 label: "Display rental images",
               },
               {
                 type: "CheckBox",
+                id: "display_tag_filter",
+                visible: false,
+                label: "Display tag filter",
+              },
+              {
+                type: "CheckBox",
+                id: "display_weekdays",
+                visible: false,
+                label: "Display weekdays",
+              },
+              {
+                type: "CheckBox",
                 id: "display_week_numbers",
+                visible: false,
                 label: "Display week numbers",
               },
               {
                 type: "CheckBox",
                 id: "display_legend",
+                visible: false,
                 label: "Display legend",
               },
               {
                 type: "CheckBox",
                 id: "stay_expanded",
+                visible: false,
                 label: "Always show booking form",
               },
               {
@@ -259,24 +427,27 @@ PluginWrapper.registerPlugin("bookingmood", {
       },
       {
         name: "Theme",
-        id: "theme_tab",
         priority: 1,
         children: [
           {
             type: "VerticalLayout",
+            id: "theme_field",
+            visible: false,
             children: [
               { type: "Label", text: "Theme" },
               {
-                type: "RadioBox",
-                id: "theme_modern",
-                label: "Modern",
-                group: "theme",
-              },
-              {
-                type: "RadioBox",
-                id: "theme_classic",
-                label: "Classic",
-                group: "theme",
+                type: "DropdownBox",
+                id: "theme",
+                enabled: false,
+                options: [],
+                change: () => {
+                  if (bmWidgetFields.theme.getSelectedItem()) {
+                    bmWidgetData.content.theme = bmWidgetFields.theme
+                      .getSelectedItem()
+                      .getOriginal().id;
+                    bmWidgetWrapper.updateFieldVisibility();
+                  }
+                },
               },
             ],
           },
@@ -296,6 +467,8 @@ PluginWrapper.registerPlugin("bookingmood", {
           },
           {
             type: "VerticalLayout",
+            id: "accent_color_field",
+            visible: false,
             children: [
               { type: "Label", text: "Accent color" },
               { type: "ColorSelector", id: "accent_color" },
@@ -303,6 +476,8 @@ PluginWrapper.registerPlugin("bookingmood", {
           },
           {
             type: "VerticalLayout",
+            id: "available_color_field",
+            visible: false,
             children: [
               { type: "Label", text: "Available color" },
               { type: "ColorSelector", id: "available_color" },
@@ -310,13 +485,18 @@ PluginWrapper.registerPlugin("bookingmood", {
           },
           {
             type: "VerticalLayout",
+            id: "tentative_color_field",
+            visible: false,
             children: [
               { type: "Label", text: "Pending color" },
               { type: "ColorSelector", id: "tentative_color" },
             ],
+            visible: false,
           },
           {
             type: "VerticalLayout",
+            id: "unavailable_color_field",
+            visible: false,
             children: [
               { type: "Label", text: "Unavailable color" },
               { type: "ColorSelector", id: "unavailable_color" },
@@ -326,11 +506,7 @@ PluginWrapper.registerPlugin("bookingmood", {
             type: "VerticalLayout",
             children: [
               { type: "Label", text: "Font" },
-              {
-                type: "DropdownBox",
-                id: "font",
-                options: defaultFontOptions,
-              },
+              { type: "DropdownBox", id: "font", enabled: false, options: [] },
             ],
           },
         ],
@@ -340,18 +516,15 @@ PluginWrapper.registerPlugin("bookingmood", {
   openAction: function (fields, data, elem) {
     bmWidgetWrapper = this;
     bmWidgetFields = fields;
+    bmWidgetData = data;
+
     // General
-    this.pluginScoped.apiKey = data.content.api_key || null;
-    this.pluginScoped.initialWidgetId = data.content.widget_id || null;
     fields.api_key.setText(data.content.api_key);
     fields.widget_id.selectItem(
       fields.locale.getItemById(data.content.widget_id || "default")
     );
 
     // Localization
-    fields.locale.selectItem(
-      fields.locale.getItemById(data.content.locale || "default")
-    );
     fields.week_starts_on.selectItem(
       fields.week_starts_on.getItemById(
         isNaN(data.content.week_starts_on)
@@ -367,15 +540,13 @@ PluginWrapper.registerPlugin("bookingmood", {
           : "default"
       )
     );
-    fields.currency.selectItem(
-      fields.currency.getItemById(data.content.currency || "default")
-    );
 
     // Layout
-    fields.size_regular.setValue(data.content.size !== "compact");
-    fields.size_compact.setValue(data.content.size === "compact");
-    fields.display_product_name.setValue(data.content.display_product_name);
+    fields.display_product_covers.setValue(data.content.display_product_covers);
     fields.display_product_images.setValue(data.content.display_product_images);
+    fields.display_product_name.setValue(data.content.display_product_name);
+    fields.display_tag_filter.setValue(data.content.display_tag_filter);
+    fields.display_weekdays.setValue(data.content.display_weekdays);
     fields.display_week_numbers.setValue(data.content.display_week_numbers);
     fields.display_legend.setValue(data.content.display_legend);
     fields.stay_expanded.setValue(data.content.stay_expanded);
@@ -384,35 +555,27 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
 
     // Theme
-    fields.theme_modern.setValue(data.content.theme !== "classic");
-    fields.theme_classic.setValue(data.content.theme === "classic");
     fields.background_color.setValue(`#${data.content.background_color}`);
     fields.text_color.setValue(`#${data.content.text_color}`);
-    fields.accent_color.setValue(`#${data.content.unavailable_color}`);
+    fields.accent_color.setValue(`#${data.content.accent_color}`);
     fields.available_color.setValue(`#${data.content.available_color}`);
     fields.tentative_color.setValue(`#${data.content.tentative_color}`);
     fields.unavailable_color.setValue(`#${data.content.unavailable_color}`);
-    fields.font.selectItem(
-      fields.font.getItemById(data.content.font || "default")
-    );
 
     // Load upstream options
-    if (this.pluginScoped.apiKey)
-      this.loadWidgets(fields, data.content.widget_id);
-    if (this.pluginScoped.currencyOptions.length === 1)
-      this.loadCurrencyOptions(fields, data.content.currency);
-    if (this.pluginScoped.fontOptions.length === 1)
-      this.loadFontOptions(fields, data.content.font);
-    if (this.pluginScoped.localeOptions.length === 1)
-      this.loadLocaleOptions(fields, data.content.locale);
+    this.updateFieldVisibility();
+    if (this.pluginScoped.apiKey) this.loadWidgets();
+    this.loadCurrencyOptions();
+    this.loadFontOptions();
+    this.loadLocaleOptions();
   },
   applyAction: function (fields, data, elem) {
     // General
     data.content.api_key = fields.api_key.getText() || null;
     if (fields.widget_id.getSelectedItem()) {
-      data.content.widget_id = fields.widget_id
-        .getSelectedItem()
-        .getOriginal().id;
+      const selectedWidget = fields.widget_id.getSelectedItem().getOriginal();
+      data.content.widget_id = selectedWidget.id;
+      data.content.widget_type = selectedWidget.type || null;
       if (data.content.widget_id === "default") data.content.widget_id = null;
     }
 
@@ -449,11 +612,16 @@ PluginWrapper.registerPlugin("bookingmood", {
     }
 
     // Layout
-    data.content.size = fields.size_compact.getValue() ? "compact" : "regular";
+    if (fields.size.getSelectedItem())
+      data.content.size = fields.size.getSelectedItem().getOriginal().id;
 
-    data.content.display_product_name = fields.display_product_name.getValue();
+    data.content.display_product_covers =
+      fields.display_product_covers.getValue();
     data.content.display_product_images =
       fields.display_product_images.getValue();
+    data.content.display_product_name = fields.display_product_name.getValue();
+    data.content.display_tag_filter = fields.display_tag_filter.getValue();
+    data.content.display_weekdays = fields.display_weekdays.getValue();
     data.content.display_week_numbers = fields.display_week_numbers.getValue();
     data.content.display_legend = fields.display_legend.getValue();
     data.content.stay_expanded = fields.stay_expanded.getValue();
@@ -461,7 +629,8 @@ PluginWrapper.registerPlugin("bookingmood", {
       fields.show_bookingmood_branding.getValue();
 
     // Theme
-    data.content.theme = fields.theme_classic.getValue() ? "classic" : "modern";
+    if (fields.theme.getSelectedItem())
+      data.content.theme = fields.theme.getSelectedItem().getOriginal().id;
     data.content.background_color = fields.background_color
       .getValue()
       .replace("#", "");
@@ -490,8 +659,11 @@ PluginWrapper.registerPlugin("bookingmood", {
     urlParams.set("first_week_contains_date", content.first_week_contains_date);
     if (content.currency) urlParams.set("currency", content.currency);
     urlParams.set("size", content.size);
+    urlParams.set("display_product_covers", content.display_product_covers);
     urlParams.set("display_product_name", content.display_product_name);
     urlParams.set("display_product_images", content.display_product_images);
+    urlParams.set("display_tag_filter", content.display_tag_filter);
+    urlParams.set("display_weekdays", content.display_weekdays);
     urlParams.set("display_week_numbers", content.display_week_numbers);
     urlParams.set("display_legend", content.display_legend);
     urlParams.set("stay_expanded", content.stay_expanded);
@@ -504,12 +676,8 @@ PluginWrapper.registerPlugin("bookingmood", {
     urlParams.set("text_color", content.text_color);
     urlParams.set("available_color", content.available_color);
     urlParams.set("tentative_color", content.tentative_color);
-    urlParams.set(
-      "unavailable_color",
-      content.theme === "modern"
-        ? content.accent_color
-        : content.unavailable_color
-    );
+    urlParams.set("unavailable_color", content.unavailable_color);
+    urlParams.set("accent_color", content.accent_color);
     if (content.font) urlParams.set("font", content.font);
     data.content.params = urlParams.toString();
   },
