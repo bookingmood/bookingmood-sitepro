@@ -126,6 +126,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
   },
   updateFieldVisibility() {
+    bmWidgetFields.api_key.setEnabled(true);
     bmWidgetFields.api_key_button.setText(
       bmWidgetData.content.api_key ? "Update" : "Confirm"
     );
@@ -564,7 +565,7 @@ PluginWrapper.registerPlugin("bookingmood", {
 
     // Load upstream options
     this.updateFieldVisibility();
-    if (this.pluginScoped.apiKey) this.loadWidgets();
+    if (data.content.api_key) this.loadWidgets();
     this.loadCurrencyOptions();
     this.loadFontOptions();
     this.loadLocaleOptions();
