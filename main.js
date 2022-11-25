@@ -220,6 +220,35 @@ PluginWrapper.registerPlugin("bookingmood", {
       ["calendar", "timeline", "inventory"].includes(widgetType)
     );
   },
+  updateUrlParams(data) {
+    const content = data.content;
+    const urlParams = new URLSearchParams();
+    urlParams.set("week_starts_on", content.week_starts_on);
+    urlParams.set("first_week_contains_date", content.first_week_contains_date);
+    if (content.currency) urlParams.set("currency", content.currency);
+    urlParams.set("size", content.size);
+    urlParams.set("display_product_covers", content.display_product_covers);
+    urlParams.set("display_product_name", content.display_product_name);
+    urlParams.set("display_product_images", content.display_product_images);
+    urlParams.set("display_tag_filter", content.display_tag_filter);
+    urlParams.set("display_weekdays", content.display_weekdays);
+    urlParams.set("display_week_numbers", content.display_week_numbers);
+    urlParams.set("display_legend", content.display_legend);
+    urlParams.set("stay_expanded", content.stay_expanded);
+    urlParams.set(
+      "show_bookingmood_branding",
+      content.show_bookingmood_branding
+    );
+    urlParams.set("theme", content.theme);
+    urlParams.set("background_color", content.background_color);
+    urlParams.set("text_color", content.text_color);
+    urlParams.set("available_color", content.available_color);
+    urlParams.set("tentative_color", content.tentative_color);
+    urlParams.set("unavailable_color", content.unavailable_color);
+    urlParams.set("accent_color", content.accent_color);
+    if (content.font) urlParams.set("font", content.font);
+    data.content.url_params = urlParams.toString();
+  },
   propertyDialog: {
     noScroll: true,
     tabs: [
@@ -535,7 +564,6 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
 
     // Localization
-    console.log(fields, data.content);
     fields.week_starts_on.selectItem(
       fields.week_starts_on.getItemById(
         data.content.week_starts_on === null ||
@@ -663,32 +691,6 @@ PluginWrapper.registerPlugin("bookingmood", {
     this.updateElement();
   },
   loadAction: function (data) {
-    const content = data.content;
-    const urlParams = new URLSearchParams();
-    urlParams.set("week_starts_on", content.week_starts_on);
-    urlParams.set("first_week_contains_date", content.first_week_contains_date);
-    if (content.currency) urlParams.set("currency", content.currency);
-    urlParams.set("size", content.size);
-    urlParams.set("display_product_covers", content.display_product_covers);
-    urlParams.set("display_product_name", content.display_product_name);
-    urlParams.set("display_product_images", content.display_product_images);
-    urlParams.set("display_tag_filter", content.display_tag_filter);
-    urlParams.set("display_weekdays", content.display_weekdays);
-    urlParams.set("display_week_numbers", content.display_week_numbers);
-    urlParams.set("display_legend", content.display_legend);
-    urlParams.set("stay_expanded", content.stay_expanded);
-    urlParams.set(
-      "show_bookingmood_branding",
-      content.show_bookingmood_branding
-    );
-    urlParams.set("theme", content.theme);
-    urlParams.set("background_color", content.background_color);
-    urlParams.set("text_color", content.text_color);
-    urlParams.set("available_color", content.available_color);
-    urlParams.set("tentative_color", content.tentative_color);
-    urlParams.set("unavailable_color", content.unavailable_color);
-    urlParams.set("accent_color", content.accent_color);
-    if (content.font) urlParams.set("font", content.font);
-    data.content.params = urlParams.toString();
+    this.updateUrlParams(data);
   },
 });
