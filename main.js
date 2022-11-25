@@ -687,13 +687,14 @@ PluginWrapper.registerPlugin("bookingmood", {
       if (data.content.font === "default") data.content.font = null;
     }
 
+    this.updateUrlParams(data);
     this.updateElement();
   },
   loadAction: function (data) {
     this.updateUrlParams(data);
   },
   loadedAction: function (_, container) {
-    console.log(bmWidgetWrapper, container[0]);
+    this.updateUrlParams(data);
     const frame = container[0].querySelector("iframe");
 
     const onMessage = (event) => {
