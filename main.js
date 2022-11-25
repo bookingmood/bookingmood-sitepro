@@ -51,7 +51,12 @@ PluginWrapper.registerPlugin("bookingmood", {
     bmWidgetFields.widget_id.setOptions(
       widgets.map((widget) => ({
         name: widget.title || `${widget.type} ${widget.id}`,
-        type: widget.type,
+        type:
+          widget.type === "inquiry"
+            ? "search"
+            : widget.type === "overview"
+            ? "timeline"
+            : widget.type,
         id: widget.id,
       }))
     );
@@ -154,6 +159,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
     if (bmWidgetFields.size.optionsSource.length > 0) {
       bmWidgetFields.size_field.setVisible(true);
+      bmWidgetFields.size.setEnabled(true);
       bmWidgetFields.size.selectItem(
         bmWidgetFields.size.getItemById(
           bmWidgetData.content.size || bmWidgetFields.size.optionsSource[0].id
@@ -161,6 +167,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       );
     } else {
       bmWidgetFields.size_field.setVisible(false);
+      bmWidgetFields.size.setEnabled(false);
       bmWidgetFields.size.selectItem(null);
     }
 
@@ -174,6 +181,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
     if (bmWidgetFields.theme.optionsSource.length > 0) {
       bmWidgetFields.theme_field.setVisible(true);
+      bmWidgetFields.theme.setEnabled(true);
       bmWidgetFields.theme.selectItem(
         bmWidgetFields.theme.getItemById(
           bmWidgetData.content.theme || bmWidgetFields.theme.optionsSource[0].id
@@ -181,6 +189,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       );
     } else {
       bmWidgetFields.theme_field.setVisible(false);
+      bmWidgetFields.theme.setEnabled(false);
       bmWidgetFields.theme.selectItem(null);
     }
 
