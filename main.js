@@ -535,6 +535,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     );
 
     // Localization
+    console.log(fields, data.content);
     fields.week_starts_on.selectItem(
       fields.week_starts_on.getItemById(
         isNaN(data.content.week_starts_on)
