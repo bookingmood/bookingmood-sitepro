@@ -691,20 +691,21 @@ PluginWrapper.registerPlugin("bookingmood", {
     this.updateElement();
   },
   loadAction: function (data) {
-    const frames = element.querySelectorAll("iframe");
+    this.updateUrlParams(data);
+  },
+  loadedAction: function (_, container) {
+    console.log(container);
+    const frame = container.querySelector("iframe");
 
     const onMessage = function (event) {
       if (!event.source) return;
       try {
         const data = JSON.parse(event.data);
-        if (data.context !== "iframe.resize") return;
-        for (const frame of frames)
-          if (data.src === frame.src) frame.height = data.height + 1;
+        if (data.context !== "iframe.resize" || data.src !== frame.src) return;
+        frame.height = data.height + 1;
       } catch {}
     };
 
     window.addEventListener("message", onMessage);
-
-    this.updateUrlParams(data);
   },
 });
