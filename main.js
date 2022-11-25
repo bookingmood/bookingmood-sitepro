@@ -5,9 +5,8 @@ let bmWidgetData;
 PluginWrapper.registerPlugin("bookingmood", {
   name: "Bookingmood widget",
   element: {
-    minSize: { width: 64, height: 64 },
-    defaultSize: { width: 800, height: 256 },
     initialFullWidth: true,
+    supportsFullWidth: true,
     resizable: false,
   },
   async loadWidgets() {
@@ -697,12 +696,13 @@ PluginWrapper.registerPlugin("bookingmood", {
     console.log(bmWidgetWrapper, container[0]);
     const frame = container[0].querySelector("iframe");
 
-    const onMessage = function (event) {
+    const onMessage = (event) => {
       if (!event.source) return;
       try {
         const data = JSON.parse(event.data);
         if (data.context !== "iframe.resize" || data.src !== frame.src) return;
         frame.height = data.height + 1;
+        this.setSize(frame.width, frame.height);
       } catch {}
     };
 
