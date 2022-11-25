@@ -18,6 +18,21 @@
         const frame = document.querySelector(`iframe[src="${data.src}"]`);
         if (!frame) return;
         frame.height = data.height + 1;
+        if (
+          frame.parentElement.parentElement?.classList.contains("wb_element")
+        ) {
+          frame.parentElement.parentElement.style.setProperty("width", "100%");
+          frame.parentElement.parentElement.style.setProperty(
+            "height",
+            `${data.height + 1}px`
+          );
+        }
+        document
+          .querySelectorAll("[data-plugin=bookingmood]")
+          .forEach((node) => {
+            node.style.setProperty("width", "100%");
+            node.style.setProperty("height", `${data.height + 1}px`);
+          });
       } catch {}
     });
   }
