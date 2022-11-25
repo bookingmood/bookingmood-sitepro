@@ -2,7 +2,7 @@
   "type": "generic",
   "requireStoreModule": false,
   "requireBillingInfo": false,
-  "fixedHeight": true,
+  "fixedHeight": false,
   "requireJsLibs": [],
   "loadModules": [],
   "admin": false

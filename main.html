@@ -1,8 +1,13 @@
 {{#content.widget_id}}
 <iframe
-  class="bm-frame"
   src="https://www.bookingmood.com{{#content.locale}}/{{content.locale}}{{/content.locale}}/embed/{{content.widget_type}}/{{content.widget_id}}?{{content.url_params}}"
+  frameborder="0"
+  marginwidth="0"
+  marginheight="0"
+  style="width: 100%; border: 0; border-radius: 4px; overflow: hidden"
+  allowfullscreen
 />
+<script src="https://www.bookingmood.com/js/embed.js"></script>
 {{/content.widget_id}}{{^content.widget_id}}
 <p>No Bookingmood widget selected</p>
 {{/content.widget_id}}
