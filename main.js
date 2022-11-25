@@ -259,14 +259,14 @@ PluginWrapper.registerPlugin("bookingmood", {
                 options: [],
                 change: () => {
                   if (bmWidgetFields.widget_id.getSelectedItem()) {
-                    const selectedWidget = fields.widget_id
+                    const selectedWidget = bmWidgetFields.widget_id
                       .getSelectedItem()
                       .getOriginal();
-                    data.content.widget_id = selectedWidget.id;
-                    data.content.widget_type = selectedWidget.type;
+                    bmWidgetData.content.widget_id = selectedWidget.id;
+                    bmWidgetData.content.widget_type = selectedWidget.type;
                   } else {
-                    data.content.widget_id = null;
-                    data.content.widget_type = null;
+                    bmWidgetData.content.widget_id = null;
+                    bmWidgetData.content.widget_type = null;
                   }
                   bmWidgetWrapper.updateFieldVisibility();
                 },
@@ -576,15 +576,13 @@ PluginWrapper.registerPlugin("bookingmood", {
     if (fields.widget_id.getSelectedItem()) {
       const selectedWidget = fields.widget_id.getSelectedItem().getOriginal();
       data.content.widget_id = selectedWidget.id;
-      data.content.widget_type = selectedWidget.type || null;
-      if (data.content.widget_id === "default") data.content.widget_id = null;
+      data.content.widget_type = selectedWidget.type;
     }
 
     // Localization
-    if (fields.locale.getSelectedItem()) {
+    if (fields.locale.getSelectedItem())
       data.content.locale = fields.locale.getSelectedItem().getOriginal().id;
-      if (data.content.locale === "default") data.content.locale = null;
-    }
+
     if (fields.week_starts_on.getSelectedItem()) {
       data.content.week_starts_on = fields.week_starts_on
         .getSelectedItem()
