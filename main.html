@@ -1,9 +1,9 @@
-{{#widget_id}}
+{{#content.widget_id}}
 <iframe
   class="bm-frame"
   src="https://www.bookingmood.com{{#content.locale}}/{{content.locale}}{{/content.locale}}/embed/{{content.widget_type}}/{{content.widget_id}}
   ?{{content.urlParams}}"
 />
-{{/widget_id}}{{^widget_id}}
+{{/content.widget_id}}{{^content.widget_id}}
 <p>No Bookingmood widget selected</p>
-{{/widget_id}}
+{{/content.widget_id}}
