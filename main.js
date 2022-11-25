@@ -694,8 +694,8 @@ PluginWrapper.registerPlugin("bookingmood", {
     this.updateUrlParams(data);
   },
   loadedAction: function (_, container) {
-    console.log(container);
-    const frame = container.querySelector("iframe");
+    console.log(bmWidgetWrapper, container[0]);
+    const frame = container[0].querySelector("iframe");
 
     const onMessage = function (event) {
       if (!event.source) return;
