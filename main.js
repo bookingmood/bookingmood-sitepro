@@ -73,7 +73,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       bmWidgetFields.currency.setError("Failed to load currencies");
       return;
     }
-    const { options } = await res.then((res) => res.json());
+    const { options } = await res.json();
     bmWidgetFields.currency.setEnabled(true);
     bmWidgetFields.currency.setError("");
     bmWidgetFields.currency.setOptions([
@@ -95,7 +95,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       bmWidgetFields.font.setError("Failed to load fonts");
       return;
     }
-    const { options } = await res.then((res) => res.json());
+    const { options } = await res.json();
     bmWidgetFields.font.setEnabled(true);
     bmWidgetFields.font.setError("");
     bmWidgetFields.font.setOptions([
@@ -115,7 +115,7 @@ PluginWrapper.registerPlugin("bookingmood", {
       bmWidgetFields.locale.setError("Failed to load locales");
       return;
     }
-    const { options } = await res.then((res) => res.json());
+    const { options } = await res.json();
     bmWidgetFields.locale.setEnabled(true);
     bmWidgetFields.locale.setError("");
     bmWidgetFields.locale.setOptions(
