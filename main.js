@@ -693,7 +693,7 @@ PluginWrapper.registerPlugin("bookingmood", {
   loadAction: function (data) {
     this.updateUrlParams(data);
   },
-  loadedAction: function (_, container) {
+  loadedAction: function (data, container) {
     this.updateUrlParams(data);
 
     const onMessage = (event) => {
