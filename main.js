@@ -50,12 +50,7 @@ PluginWrapper.registerPlugin("bookingmood", {
     bmWidgetFields.widget_id.setOptions(
       widgets.map((widget) => ({
         name: widget.title || `${widget.type} ${widget.id}`,
-        type:
-          widget.type === "inquiry"
-            ? "search"
-            : widget.type === "overview"
-            ? "timeline"
-            : widget.type,
+        type: widget.type,
         id: widget.id,
       }))
     );
