@@ -217,6 +217,7 @@ PluginWrapper.registerPlugin("bookingmood", {
   updateUrlParams(data) {
     const content = data.content;
     const urlParams = new URLSearchParams();
+    urlParams.set("locale", content.locale);
     urlParams.set("week_starts_on", content.week_starts_on);
     urlParams.set("first_week_contains_date", content.first_week_contains_date);
     if (content.currency) urlParams.set("currency", content.currency);
